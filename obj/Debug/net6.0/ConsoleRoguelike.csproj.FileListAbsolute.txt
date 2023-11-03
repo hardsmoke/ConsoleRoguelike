@@ -1,0 +1,14 @@
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\bin\Debug\net6.0\ConsoleRoguelike.exe
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\bin\Debug\net6.0\ConsoleRoguelike.deps.json
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\bin\Debug\net6.0\ConsoleRoguelike.runtimeconfig.json
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\bin\Debug\net6.0\ConsoleRoguelike.dll
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\bin\Debug\net6.0\ConsoleRoguelike.pdb
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.GeneratedMSBuildEditorConfig.editorconfig
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.AssemblyInfoInputs.cache
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.AssemblyInfo.cs
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.csproj.CoreCompileInputs.cache
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.dll
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\refint\ConsoleRoguelike.dll
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.pdb
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ConsoleRoguelike.genruntimeconfig.cache
+D:\Items\other\edu\М1\ООП\ConsoleRoguelike\obj\Debug\net6.0\ref\ConsoleRoguelike.dll

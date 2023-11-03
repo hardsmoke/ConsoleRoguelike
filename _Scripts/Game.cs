@@ -1,0 +1,272 @@
+﻿namespace ConsoleRoguelike
+{
+    using ConsoleRoguelike.CreatureCondition;
+    using ConsoleRoguelike.GameObjects.AI;
+    using GameObjects;
+    using GameScene;
+    using Input;
+    using MapGeneration;
+    using Render;
+    using System;
+
+    class Game
+    {
+        private static Scene _scene;
+        private static Player _player;
+        private static Maze _maze;
+        private static KeysBindingHandler _keysBindingHandler;
+
+        private static int _playerInitialHealthValue = 100;
+        private static int _playerLayerNumber = 0;
+        private static int _wallsLayerNumber = 1;
+        private static Vector2Int _mazeSize = new Vector2Int(18, 6);
+        private static Vector2Int _playerSpawnMazePosition;
+
+        private static List<GameObject> _mazeWalls = new List<GameObject>();
+        private static List<Enemy> _enemies = new List<Enemy>();
+        private static List<FirstAidKit> _firstAidKits = new List<FirstAidKit>();
+
+        private static SceneRenderer _sceneRenderer;
+        private static HealthBarRenderer _playerHealthBarRenderer;
+
+        private static void Main(string[] args)
+        {
+            Console.CursorVisible = false;
+
+            InitializeScene();
+            InitializePlayer();
+            CreateMaze();
+            CreateEnemies();
+            CreateFirstAidKits();
+
+            RenderPlayerHealthBar();
+
+            InitializePlayerInput();
+            ReadPlayerInput();
+        }
+
+        private static void InitializeScene()
+        {
+            _scene = new Scene();
+            _sceneRenderer = new SceneRenderer(_scene);
+        }
+
+        private static void InitializePlayer()
+        {
+            _playerSpawnMazePosition = Vector2Int.Random(Vector2Int.Zero, _mazeSize);
+            SceneLayer playerSceneLayer = _scene.GetLayer(_playerLayerNumber);
+            _player = new Player(MazeConverter.ConvertMazeToConsoleCoords(_playerSpawnMazePosition), '☻', _scene, playerSceneLayer, _scene.GetLayer(3));
+            _player.PositionChanged += OnPlayerPositionChanged;
+            _player.Health.OnDie += OnPlayerDied;
+        }
+
+        private static void CreateMaze()
+        {
+            SceneLayer mazeSceneLayer = _scene.GetLayer(_wallsLayerNumber);
+            _maze = MazeGenerator.GenerateMaze(_playerSpawnMazePosition, _mazeSize.X, _mazeSize.Y, out _);
+            List<Vector2Int> wallsPositions = MazeConverter.ConvertMazeToWallsPositions(_maze);
+            _mazeWalls = GameObject.CreateGameObjects<GameObject>(wallsPositions, '█', _scene, mazeSceneLayer);
+
+            Vector2Int exitWallMazePosition = _maze.ExitCell.Position;
+            Vector2Int exitWallConsolePosition = MazeConverter.ConvertMazeToConsoleCoords(exitWallMazePosition);
+
+            if (exitWallMazePosition.X == 0)
+                exitWallConsolePosition += Vector2Int.Left;
+            else if (exitWallMazePosition.Y == 0)
+                exitWallConsolePosition += Vector2Int.Down;
+            else if (exitWallMazePosition.X == _mazeSize.X - 1)
+                exitWallConsolePosition += Vector2Int.Right;
+            else if (exitWallMazePosition.Y == _mazeSize.Y - 1)
+                exitWallConsolePosition += Vector2Int.Up;
+
+            _mazeWalls.Add(new GameObject(exitWallConsolePosition, ' ', _scene, mazeSceneLayer));
+        }
+
+        private static void CreateEnemies()
+        {
+            SceneLayer emenySceneLayer = _scene.GetLayer(_playerLayerNumber);
+
+            int zombieMemoryCapacity = _mazeSize.X * _mazeSize.Y / 4;
+            int zombiesNumber = _mazeSize.X * _mazeSize.Y / ((_mazeSize.X + _mazeSize.Y) * 2);
+            for (int i = 0; i < zombiesNumber; i++)
+            {
+                Vector2Int mazeRandomPosition = Vector2Int.Random(Vector2Int.Zero, _mazeSize);
+                Vector2Int consoleRandomPosition = MazeConverter.ConvertMazeToConsoleCoords(mazeRandomPosition);
+                if (emenySceneLayer.Contains(mazeRandomPosition) == false)
+                {
+                    _enemies.Add(new Zombie(consoleRandomPosition, _scene, emenySceneLayer, zombieMemoryCapacity));
+                }
+            }
+
+            int shooterMemoryCapacity = _mazeSize.X * _mazeSize.Y / 4;
+            int shootersNumber = zombiesNumber / 2 + 1;
+            for (int i = 0; i < shootersNumber; i++)
+            {
+                Vector2Int mazeRandomPosition = Vector2Int.Random(Vector2Int.Zero, _mazeSize);
+                Vector2Int consoleRandomPosition = MazeConverter.ConvertMazeToConsoleCoords(mazeRandomPosition);
+                if (emenySceneLayer.Contains(mazeRandomPosition) == false)
+                {
+                    Shooter shooter = new Shooter(consoleRandomPosition, _scene, emenySceneLayer, shooterMemoryCapacity);
+                    shooter.Shooted += OnShooterShooted;
+
+                    _enemies.Add(shooter);
+                }
+            }
+
+            void OnShooterShooted(Bullet bullet)
+            {
+                _enemies.Add(bullet);
+                bullet.Destroyed += OnBulletDestroyed;
+            }
+
+            void OnBulletDestroyed(Bullet bullet)
+            {
+                bullet.Destroyed -= OnBulletDestroyed;
+                _enemies.Remove(bullet);
+            }
+        }
+
+        private static void CreateFirstAidKits()
+        {
+            int numberOfFirstAidKits = _enemies.Count / 4 + 1;
+
+            Vector2Int mazeRandomPosition = Vector2Int.Random(Vector2Int.Zero, _mazeSize);
+            Vector2Int consoleRandomPosition = MazeConverter.ConvertMazeToConsoleCoords(mazeRandomPosition);
+            for (int i = 0; i < numberOfFirstAidKits; i++)
+            {
+                FirstAidKit firstAidKit = new FirstAidKit(consoleRandomPosition, _scene, _scene.GetLayer(_playerLayerNumber));
+                firstAidKit.Healed += OnFirstAidKitHealed;
+                _firstAidKits.Add(firstAidKit);
+            }
+
+            void OnFirstAidKitHealed(FirstAidKit kit)
+            {
+                kit.Healed -= OnFirstAidKitHealed;
+                _firstAidKits.Remove(kit);
+            }
+        }
+
+        private static void RenderPlayerHealthBar()
+        {
+            _playerHealthBarRenderer = new HealthBarRenderer(_player.Health);
+            _playerHealthBarRenderer.StartRenderPosition = _sceneRenderer.GetBottomLeftRenderedPosition() + Vector2Int.Up;
+            _playerHealthBarRenderer.Render();
+        }
+
+        private static void InitializePlayerInput()
+        {
+            _keysBindingHandler = new KeysBindingHandler();
+            MakeBindingsOnPlayerAlive();
+        }
+
+        private static void MakeBindingsOnPlayerAlive()
+        {
+            AddWalkingBindings();
+
+            _keysBindingHandler.RemoveBinding('f', RespawnPlayer);
+            _keysBindingHandler.AddBinding('h', _player.SwitchCollisionMode);
+        }
+
+        private static void MakeBindingsOnPlayerDied()
+        {
+            RemoveWalkingBindings();
+
+            _keysBindingHandler.AddBinding('f', RespawnPlayer);
+            _keysBindingHandler.RemoveBinding('h', _player.SwitchCollisionMode);
+        }
+
+        private static void AddWalkingBindings()
+        {
+            _keysBindingHandler.AddBinding('w', _player.MoveUp);
+            _keysBindingHandler.AddBinding('a', _player.MoveLeft);
+            _keysBindingHandler.AddBinding('s', _player.MoveDown);
+            _keysBindingHandler.AddBinding('d', _player.MoveRight);
+        }
+
+        private static void RemoveWalkingBindings()
+        {
+            _keysBindingHandler.RemoveBinding('w', _player.MoveUp);
+            _keysBindingHandler.RemoveBinding('a', _player.MoveLeft);
+            _keysBindingHandler.RemoveBinding('s', _player.MoveDown);
+            _keysBindingHandler.RemoveBinding('d', _player.MoveRight);
+        }
+
+        private static void OnPlayerDied(IDamager damager)
+        {
+            _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(_player.Position);
+
+            MakeBindingsOnPlayerDied();
+        }
+
+        private static void RespawnPlayer()
+        {
+            LoadNewLevel();
+            MakeBindingsOnPlayerAlive();
+        }
+
+        private static void OnPlayerPositionChanged(Transform transform, Vector2Int previousPosition, Vector2Int newPosition)
+        {
+            MakeEnemiesStep();
+
+            if (IsPlayerOnTheExitCell(newPosition))
+            {
+                _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(newPosition);
+                LoadNewLevel();
+            }
+        }
+
+        private static void LoadNewLevel()
+        {
+            _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(_player.Position);
+            _player.Health.SetValue(_playerInitialHealthValue, null);
+
+            DestroyFirstAidKits();
+            CreateFirstAidKits();
+
+            DestroyMaze();
+            CreateMaze();
+
+            DestroyEnemies();
+            CreateEnemies();
+        }
+
+        private static void MakeEnemiesStep()
+        {
+            for (int i = 0; i < _enemies.Count; i++)
+            {
+                _enemies[i].MakeNextStep();
+            }
+        }
+
+        private static void DestroyFirstAidKits()
+        {
+            GameObject.DeinitializeGameObjects(_firstAidKits);
+            _firstAidKits.Clear();
+        }
+
+        private static void DestroyMaze()
+        {
+            GameObject.DeinitializeGameObjects(_mazeWalls);
+            _mazeWalls.Clear();
+        }
+
+        private static void DestroyEnemies()
+        {
+            GameObject.DeinitializeGameObjects(_enemies);
+            _enemies.Clear();
+        }
+
+        private static void ReadPlayerInput()
+        {
+            while (true)
+            {
+                _keysBindingHandler.ReadBindings();
+            }
+        }
+
+        private static bool IsPlayerOnTheExitCell(Vector2Int playerPosition)
+        {
+            return playerPosition == MazeConverter.ConvertMazeToConsoleCoords(_maze.ExitCell.Position);
+        }
+    }
+}
