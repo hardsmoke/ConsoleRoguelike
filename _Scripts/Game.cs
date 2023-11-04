@@ -163,32 +163,32 @@
         {
             AddWalkingBindings();
 
-            _keysBindingHandler.RemoveBinding('f', RespawnPlayer);
-            _keysBindingHandler.AddBinding('h', _player.SwitchCollisionMode);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.F, RespawnPlayer);
+            _keysBindingHandler.AddBinding(ConsoleKey.H, _player.SwitchCollisionMode);
         }
 
         private static void MakeBindingsOnPlayerDied()
         {
             RemoveWalkingBindings();
 
-            _keysBindingHandler.AddBinding('f', RespawnPlayer);
-            _keysBindingHandler.RemoveBinding('h', _player.SwitchCollisionMode);
+            _keysBindingHandler.AddBinding(ConsoleKey.F, RespawnPlayer);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.H, _player.SwitchCollisionMode);
         }
 
         private static void AddWalkingBindings()
         {
-            _keysBindingHandler.AddBinding('w', _player.MoveUp);
-            _keysBindingHandler.AddBinding('a', _player.MoveLeft);
-            _keysBindingHandler.AddBinding('s', _player.MoveDown);
-            _keysBindingHandler.AddBinding('d', _player.MoveRight);
+            _keysBindingHandler.AddBinding(ConsoleKey.W, _player.MoveUp);
+            _keysBindingHandler.AddBinding(ConsoleKey.A, _player.MoveLeft);
+            _keysBindingHandler.AddBinding(ConsoleKey.S, _player.MoveDown);
+            _keysBindingHandler.AddBinding(ConsoleKey.D, _player.MoveRight);
         }
 
         private static void RemoveWalkingBindings()
         {
-            _keysBindingHandler.RemoveBinding('w', _player.MoveUp);
-            _keysBindingHandler.RemoveBinding('a', _player.MoveLeft);
-            _keysBindingHandler.RemoveBinding('s', _player.MoveDown);
-            _keysBindingHandler.RemoveBinding('d', _player.MoveRight);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.W, _player.MoveUp);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.A, _player.MoveLeft);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.S, _player.MoveDown);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.D, _player.MoveRight);
         }
 
         private static void OnPlayerDied(IDamager damager)

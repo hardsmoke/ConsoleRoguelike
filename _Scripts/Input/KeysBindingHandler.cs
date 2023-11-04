@@ -2,9 +2,9 @@
 {
     internal class KeysBindingHandler
     {
-        private Dictionary<char, Action> _bindings = new Dictionary<char, Action>();
+        private Dictionary<ConsoleKey, Action> _bindings = new Dictionary<ConsoleKey, Action>();
 
-        public void AddBinding(char key, Action action)
+        public void AddBinding(ConsoleKey key, Action action)
         {
             if (action != null)
             {
@@ -19,7 +19,7 @@
             }
         }
 
-        public void RemoveBinding(char key, Action action)
+        public void RemoveBinding(ConsoleKey key, Action action)
         {
             if (action != null && _bindings.ContainsKey(key))
             {
@@ -27,7 +27,7 @@
             }
         }
 
-        public void RemoveBinding(char key)
+        public void RemoveBinding(ConsoleKey key)
         {
             _bindings.Remove(key);
         }
@@ -37,9 +37,9 @@
             if (Console.KeyAvailable)
             {
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-                if (_bindings.ContainsKey(keyInfo.KeyChar))
+                if (_bindings.ContainsKey(keyInfo.Key))
                 {
-                    _bindings[keyInfo.KeyChar]?.Invoke();
+                    _bindings[keyInfo.Key]?.Invoke();
                 }
             }
         }
