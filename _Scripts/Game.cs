@@ -84,15 +84,16 @@ namespace ConsoleRoguelike
         {
             Vector2Int exitWallMazePosition = _maze.ExitCell.Position;
             Vector2Int exitWallConsolePosition = MazeConverter.ConvertMazeToConsoleCoords(exitWallMazePosition);
+            Vector2Int wallToRemove = exitWallMazePosition switch
+            {
+                Vector2Int when exitWallMazePosition.X == 0 => Vector2Int.Left,
+                Vector2Int when exitWallMazePosition.Y == 0 => Vector2Int.Down,
+                Vector2Int when exitWallMazePosition.X == _mazeSize.X - 1 => Vector2Int.Right,
+                Vector2Int when exitWallMazePosition.Y == _mazeSize.Y - 1 => Vector2Int.Up,
+                _ => throw new NotImplementedException(),
+            };
 
-            if (exitWallMazePosition.X == 0)
-                exitWallConsolePosition += Vector2Int.Left;
-            else if (exitWallMazePosition.Y == 0)
-                exitWallConsolePosition += Vector2Int.Down;
-            else if (exitWallMazePosition.X == _mazeSize.X - 1)
-                exitWallConsolePosition += Vector2Int.Right;
-            else if (exitWallMazePosition.Y == _mazeSize.Y - 1)
-                exitWallConsolePosition += Vector2Int.Up;
+            exitWallConsolePosition += wallToRemove;
 
             _mazeWalls.Add(new Wall(exitWallConsolePosition, _scene, _scene.GetLayer(_wallsLayerNumber), ' '));
         }
