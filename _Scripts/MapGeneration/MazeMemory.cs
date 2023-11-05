@@ -1,4 +1,6 @@
-﻿namespace ConsoleRoguelike.MapGeneration
+﻿using ConsoleRoguelike.CoreModule;
+
+namespace ConsoleRoguelike.MapGeneration
 {
     internal class MazeMemory : IReadOnlyMazeMemory
     {
@@ -43,7 +45,7 @@
             return -1;
         }
 
-        public void AddPositionInMemory(Vector2Int position)
+        public void AddPositionToMemory(Vector2Int position)
         {
             if (_previousPositions.Count >= MazeMemoryCapacity)
             {

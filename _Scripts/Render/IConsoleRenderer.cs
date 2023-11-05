@@ -1,4 +1,6 @@
-﻿namespace ConsoleRoguelike.Render
+﻿using ConsoleRoguelike.CoreModule;
+
+namespace ConsoleRoguelike.Render
 {
     internal interface IConsoleRenderer : IRenderer
     {

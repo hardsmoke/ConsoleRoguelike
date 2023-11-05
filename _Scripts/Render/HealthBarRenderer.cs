@@ -1,59 +1,46 @@
-﻿using ConsoleRoguelike.CreatureCondition;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.CreatureCondition;
 using System.Text;
 
 namespace ConsoleRoguelike.Render
 {
-    internal class HealthBarRenderer : IConsoleRenderer
+    internal class HealthBarRenderer : IReadOnlyHealthBarRenderer
     {
-        private Health _health;
+        private readonly IReadOnlyHealth _health;
+        public IReadOnlyHealth Health => _health;
+
+        private readonly ConsoleColor _color;
         private int _barWidth = 0;
-        private ConsoleColor _color;
+        public int Width => _barWidth;
 
         private Vector2Int _startRenderPosition;
         public Vector2Int StartRenderPosition { get => _startRenderPosition; set => _startRenderPosition = value; }
 
-        public HealthBarRenderer(Health health, ConsoleColor color = ConsoleColor.White)
+        public HealthBarRenderer(IReadOnlyHealth health, ConsoleColor color = ConsoleColor.White)
         {
             _health = health;
             _color = color;
 
-            _health.OnHealthChange += OnHealthChanged;
-            _health.OnDie += OnDied;
+            Health.HealthChanged += OnHealthChanged;
+            Health.Died += OnDied;
         }
 
-        public void ClearHealthBar()
+        public void ClearRender()
         {
-            Console.SetCursorPosition(_startRenderPosition.X, _startRenderPosition.Y);
+            Console.SetCursorPosition(StartRenderPosition.X, StartRenderPosition.Y);
             StringBuilder builder = new StringBuilder();
-            builder.Append(' ', _barWidth);
-            Console.WriteLine($"{builder}");
-        }
-
-        public void RenderHealthBar()
-        {
-            Console.ForegroundColor = _color;
-            ClearHealthBar();
-            Console.SetCursorPosition(_startRenderPosition.X, _startRenderPosition.Y);
-            string healthBarText = $"Health: {_health.Value}%";
-            _barWidth = healthBarText.Length;
-            Console.Write(healthBarText);
-        }
-
-        public void RenderDeathScreen(IDamager killer)
-        {
-            ClearHealthBar();
-            Console.SetCursorPosition(_startRenderPosition.X, _startRenderPosition.Y);
-            string deathScreenText = $"{killer.DeathReason} | PRESS F TO PAY RESPECT";
-            _barWidth = deathScreenText.Length;
-            Console.Write(deathScreenText);
+            builder.Append(' ', Width);
+            Console.Write($"{builder}");
         }
 
         public void Render()
         {
-            if (_health.Value > 0)
-            {
-                RenderHealthBar();
-            }
+            ClearRender();
+            Console.ForegroundColor = _color;
+            Console.SetCursorPosition(StartRenderPosition.X, StartRenderPosition.Y);
+            string healthBarText = $"Health: {Health.Value}%";
+            _barWidth = healthBarText.Length;
+            Console.Write(healthBarText);
         }
 
         public Vector2Int GetBottomLeftRenderedPosition()
@@ -61,14 +48,14 @@ namespace ConsoleRoguelike.Render
             return _startRenderPosition;
         }
 
-        private void OnHealthChanged(float changeDelta)
+        private void OnHealthChanged(float healthBefore, float currentHealth)
         {
             Render();
         }
 
         private void OnDied(IDamager killer)
         {
-            RenderDeathScreen(killer);
+            Render();
         }
     }
 }

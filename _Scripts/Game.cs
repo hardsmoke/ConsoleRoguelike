@@ -1,14 +1,14 @@
-﻿namespace ConsoleRoguelike
-{
-    using ConsoleRoguelike.CreatureCondition;
-    using ConsoleRoguelike.GameObjects.AI;
-    using GameObjects;
-    using GameScene;
-    using Input;
-    using MapGeneration;
-    using Render;
-    using System;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.CreatureCondition;
+using ConsoleRoguelike.GameObjects;
+using ConsoleRoguelike.GameObjects.AI;
+using ConsoleRoguelike.GameScene;
+using ConsoleRoguelike.Input;
+using ConsoleRoguelike.MapGeneration;
+using ConsoleRoguelike.Render;
 
+namespace ConsoleRoguelike
+{
     class Game
     {
         private static Scene _scene;
@@ -28,6 +28,9 @@
 
         private static SceneRenderer _sceneRenderer;
         private static HealthBarRenderer _playerHealthBarRenderer;
+        private static DeathScreenRenderer _deathScreenRenderer;
+
+        private static bool _isReadingInput = false;
 
         private static void Main(string[] args)
         {
@@ -39,6 +42,8 @@
             CreateEnemies();
             CreateFirstAidKits();
 
+            InitializePlayerHealthBar();
+            InitializePlayerDeathScreen();
             RenderPlayerHealthBar();
 
             InitializePlayerInput();
@@ -55,18 +60,28 @@
         {
             _playerSpawnMazePosition = Vector2Int.Random(Vector2Int.Zero, _mazeSize);
             SceneLayer playerSceneLayer = _scene.GetLayer(_playerLayerNumber);
-            _player = new Player(MazeConverter.ConvertMazeToConsoleCoords(_playerSpawnMazePosition), '☻', _scene, playerSceneLayer, _scene.GetLayer(3));
+            _player = new Player(MazeConverter.ConvertMazeToConsoleCoords(_playerSpawnMazePosition), _scene, playerSceneLayer, _scene.GetLayer(3));
             _player.PositionChanged += OnPlayerPositionChanged;
-            _player.Health.OnDie += OnPlayerDied;
+            _player.Health.Died += OnPlayerDied;
         }
 
         private static void CreateMaze()
         {
-            SceneLayer mazeSceneLayer = _scene.GetLayer(_wallsLayerNumber);
+            _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(_player.Position);
             _maze = MazeGenerator.GenerateMaze(_playerSpawnMazePosition, _mazeSize.X, _mazeSize.Y, out _);
+            _player.Position = MazeConverter.ConvertMazeToConsoleCoords(_playerSpawnMazePosition);
             List<Vector2Int> wallsPositions = MazeConverter.ConvertMazeToWallsPositions(_maze);
-            _mazeWalls = GameObject.CreateGameObjects<GameObject>(wallsPositions, '█', _scene, mazeSceneLayer);
+            _mazeWalls = new List<GameObject>();
+            for (int i = 0; i < wallsPositions.Count; i++)
+            {
+                _mazeWalls.Add(new Wall(wallsPositions[i], _scene, _scene.GetLayer(_wallsLayerNumber)));
+            }
 
+            CreateMazeExitWall();
+        }
+
+        private static void CreateMazeExitWall()
+        {
             Vector2Int exitWallMazePosition = _maze.ExitCell.Position;
             Vector2Int exitWallConsolePosition = MazeConverter.ConvertMazeToConsoleCoords(exitWallMazePosition);
 
@@ -79,7 +94,7 @@
             else if (exitWallMazePosition.Y == _mazeSize.Y - 1)
                 exitWallConsolePosition += Vector2Int.Up;
 
-            _mazeWalls.Add(new GameObject(exitWallConsolePosition, ' ', _scene, mazeSceneLayer));
+            _mazeWalls.Add(new Wall(exitWallConsolePosition, _scene, _scene.GetLayer(_wallsLayerNumber), ' '));
         }
 
         private static void CreateEnemies()
@@ -139,22 +154,32 @@
                 _firstAidKits.Add(firstAidKit);
             }
 
-            void OnFirstAidKitHealed(FirstAidKit kit)
+            static void OnFirstAidKitHealed(FirstAidKit kit)
             {
                 kit.Healed -= OnFirstAidKitHealed;
                 _firstAidKits.Remove(kit);
             }
         }
 
-        private static void RenderPlayerHealthBar()
+        private static void InitializePlayerHealthBar()
         {
             _playerHealthBarRenderer = new HealthBarRenderer(_player.Health);
             _playerHealthBarRenderer.StartRenderPosition = _sceneRenderer.GetBottomLeftRenderedPosition() + Vector2Int.Up;
+        }
+
+        private static void InitializePlayerDeathScreen()
+        {
+            _deathScreenRenderer = new DeathScreenRenderer(_playerHealthBarRenderer);
+        }
+
+        private static void RenderPlayerHealthBar()
+        {
             _playerHealthBarRenderer.Render();
         }
 
         private static void InitializePlayerInput()
         {
+            _isReadingInput = true;
             _keysBindingHandler = new KeysBindingHandler();
             MakeBindingsOnPlayerAlive();
         }
@@ -164,6 +189,8 @@
             AddWalkingBindings();
 
             _keysBindingHandler.RemoveBinding(ConsoleKey.F, RespawnPlayer);
+            _keysBindingHandler.RemoveBinding(ConsoleKey.L, LoadNewLevel);
+            _keysBindingHandler.AddBinding(ConsoleKey.L, LoadNewLevel);
             _keysBindingHandler.AddBinding(ConsoleKey.H, _player.SwitchCollisionMode);
         }
 
@@ -193,8 +220,6 @@
 
         private static void OnPlayerDied(IDamager damager)
         {
-            _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(_player.Position);
-
             MakeBindingsOnPlayerDied();
         }
 
@@ -210,14 +235,12 @@
 
             if (IsPlayerOnTheExitCell(newPosition))
             {
-                _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(newPosition);
                 LoadNewLevel();
             }
         }
 
         private static void LoadNewLevel()
         {
-            _playerSpawnMazePosition = MazeConverter.ConvertConsoleToMazeCoords(_player.Position);
             _player.Health.SetValue(_playerInitialHealthValue, null);
 
             DestroyFirstAidKits();
@@ -258,7 +281,7 @@
 
         private static void ReadPlayerInput()
         {
-            while (true)
+            while (_isReadingInput)
             {
                 _keysBindingHandler.ReadBindings();
             }

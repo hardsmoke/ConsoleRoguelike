@@ -1,4 +1,5 @@
-﻿using ConsoleRoguelike.GameObjects;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.GameObjects;
 
 namespace ConsoleRoguelike.GameScene
 {

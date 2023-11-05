@@ -1,8 +1,9 @@
-﻿namespace ConsoleRoguelike.GameObjects
-{
-    using ConsoleRoguelike.CreatureCondition;
-    using GameScene;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.CreatureCondition;
+using ConsoleRoguelike.GameScene;
 
+namespace ConsoleRoguelike.GameObjects
+{
     internal class Player : GameObject
     {
         private Health _health;
@@ -13,7 +14,7 @@
 
         public bool IsCollisionEnabled() => SceneLayer == _enabledCollisionSceneLayer;
 
-        public Player(Vector2Int position, char ch, IReadOnlyScene scene, SceneLayer sceneLayer, SceneLayer disabledCollisionSceneLayer, float health = 100, ConsoleColor color = ConsoleColor.Blue) : base(position, ch, scene, sceneLayer, color)
+        public Player(Vector2Int position, IReadOnlyScene scene, SceneLayer sceneLayer, SceneLayer disabledCollisionSceneLayer, char renderedChar = '☻', float health = 100, ConsoleColor color = ConsoleColor.Blue) : base(position, renderedChar, scene, sceneLayer, color)
         {
             _enabledCollisionSceneLayer = sceneLayer;
             _disabledCollisionSceneLayer = disabledCollisionSceneLayer;

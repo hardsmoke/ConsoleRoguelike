@@ -1,4 +1,6 @@
-﻿namespace ConsoleRoguelike.MapGeneration
+﻿using ConsoleRoguelike.CoreModule;
+
+namespace ConsoleRoguelike.MapGeneration
 {
     internal interface IReadOnlyMazeMemory
     {

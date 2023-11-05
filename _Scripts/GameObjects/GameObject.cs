@@ -1,9 +1,9 @@
-﻿namespace ConsoleRoguelike.GameObjects
-{
-    using GameScene;
-    using Render;
-    using System.Collections.Generic;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.GameScene;
+using ConsoleRoguelike.Render;
 
+namespace ConsoleRoguelike.GameObjects
+{
     internal class GameObject : Transform
     {
         private TransformRenderer _renderer;
@@ -82,18 +82,6 @@
             _sceneLayer.RemoveGameObject(this);
             _sceneLayer = sceneLayer;
             _sceneLayer.AddGameObject(this);
-        }
-
-        public static List<GameObject> CreateGameObjects<TTransform>(List<Vector2Int> positions, char renderedChar, IReadOnlyScene scene, SceneLayer layer, ConsoleColor color = ConsoleColor.White) where TTransform : Transform
-        {
-            List<GameObject> objects = new List<GameObject>();
-
-            for (int i = 0; i < positions.Count; i++)
-            {
-                objects.Add(new GameObject(positions[i], renderedChar, scene, layer, color));
-            }
-
-            return objects;
         }
 
         public static void DeinitializeGameObjects<TGameObject>(List<TGameObject> gameObjects) where TGameObject : GameObject

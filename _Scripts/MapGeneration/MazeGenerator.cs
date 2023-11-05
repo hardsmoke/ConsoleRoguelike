@@ -1,4 +1,6 @@
-﻿namespace ConsoleRoguelike.MapGeneration
+﻿using ConsoleRoguelike.CoreModule;
+
+namespace ConsoleRoguelike.MapGeneration
 {
     internal static class MazeGenerator
     {
@@ -57,16 +59,16 @@
                 Vector2Int currentCellPosition = current.Cell.Position;
                 List<MazeGeneratorCell> unvisitedNeighbours = new List<MazeGeneratorCell>();
 
-                if (MustVisitTopNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell topNeighbour))
+                if (ShouldVisitTopNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell topNeighbour))
                     unvisitedNeighbours.Add(topNeighbour);
 
-                if (MustVisitBottomNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell bottomNeighbour))
+                if (ShouldVisitBottomNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell bottomNeighbour))
                     unvisitedNeighbours.Add(bottomNeighbour);
 
-                if (MustVisitLeftNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell leftNeighbour))
+                if (ShouldVisitLeftNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell leftNeighbour))
                     unvisitedNeighbours.Add(leftNeighbour);
 
-                if (MustVisitRightNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell rightNeighbour))
+                if (ShouldVisitRightNeighbour(generatorCells, currentCellPosition, out MazeGeneratorCell rightNeighbour))
                     unvisitedNeighbours.Add(rightNeighbour);
 
                 if (unvisitedNeighbours.Count > 0)
@@ -115,19 +117,19 @@
             }
 
             if (exitCell.Cell.Position.X == 0)
-                exitCell.Cell.WallsLocalPositions.Remove(Vector2Int.Left);
+                exitCell.Cell.RemoveLeftWall();
             else if (exitCell.Cell.Position.Y == 0)
-                exitCell.Cell.WallsLocalPositions.Remove(Vector2Int.Down);
+                exitCell.Cell.RemoveDownWall();
             else if (exitCell.Cell.Position.X == width - 1)
-                exitCell.Cell.WallsLocalPositions.Remove(Vector2Int.Right);
+                exitCell.Cell.RemoveRightWall();
             else if (exitCell.Cell.Position.Y == height - 1)
-                exitCell.Cell.WallsLocalPositions.Remove(Vector2Int.Up);
+                exitCell.Cell.RemoveUpWall();
 
         }
 
-        private static bool MustVisitTopNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell topNeighbour)
+        private static bool ShouldVisitTopNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell topNeighbour)
         {
-            topNeighbour = null;
+            topNeighbour = default;
             if (HasTopNeighbour(currentCellPosition, out Vector2Int topNeighbourPosition))
             {
                 topNeighbour = generatorCells[topNeighbourPosition.X, topNeighbourPosition.Y];
@@ -143,9 +145,9 @@
             return topNeighbourPosition.Y >= 0;
         }
 
-        private static bool MustVisitBottomNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell buttomNeighbour)
+        private static bool ShouldVisitBottomNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell buttomNeighbour)
         {
-            buttomNeighbour = null;
+            buttomNeighbour = default;
             if (HasButtomNeighbour(currentCellPosition, generatorCells.GetLength(1), out Vector2Int buttomNeighbourPosition))
             {
                 buttomNeighbour = generatorCells[buttomNeighbourPosition.X, buttomNeighbourPosition.Y];
@@ -161,9 +163,9 @@
             return buttomNeighbourPosition.Y < mazeHeight;
         }
 
-        private static bool MustVisitLeftNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell leftNeighbour)
+        private static bool ShouldVisitLeftNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell leftNeighbour)
         {
-            leftNeighbour = null;
+            leftNeighbour = default;
             if (HasLeftNeighbour(currentCellPosition, out Vector2Int leftNeighbourPosition))
             {
                 leftNeighbour = generatorCells[leftNeighbourPosition.X, leftNeighbourPosition.Y];
@@ -179,9 +181,9 @@
             return leftNeighbourPosition.X >= 0;
         }
 
-        private static bool MustVisitRightNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell rightNeighbour)
+        private static bool ShouldVisitRightNeighbour(MazeGeneratorCell[,] generatorCells, Vector2Int currentCellPosition, out MazeGeneratorCell rightNeighbour)
         {
-            rightNeighbour = null;
+            rightNeighbour = default;
             if (HasRightNeighbour(currentCellPosition, generatorCells.GetLength(0), out Vector2Int rightNeighbourPosition))
             {
                 rightNeighbour = generatorCells[rightNeighbourPosition.X, rightNeighbourPosition.Y];
@@ -204,8 +206,8 @@
 
         private static void RemoveWall(MazeGeneratorCell first, MazeGeneratorCell second)
         {
-            first.Cell.WallsLocalPositions.Remove(second.Cell.Position - first.Cell.Position);
-            second.Cell.WallsLocalPositions.Remove(first.Cell.Position - second.Cell.Position);
+            first.Cell.RemoveWall(second.Cell.Position - first.Cell.Position);
+            second.Cell.RemoveWall(first.Cell.Position - second.Cell.Position);
         }
     }
 }

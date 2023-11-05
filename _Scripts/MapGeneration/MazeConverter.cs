@@ -1,4 +1,6 @@
-﻿namespace ConsoleRoguelike.MapGeneration
+﻿using ConsoleRoguelike.CoreModule;
+
+namespace ConsoleRoguelike.MapGeneration
 {
     internal static class MazeConverter
     {
@@ -54,6 +56,7 @@
                     Vector2Int downWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Down).FirstOrDefault();
                     Vector2Int leftWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Left).FirstOrDefault();
                     Vector2Int rightWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Right).FirstOrDefault();
+
                     if (mazeCell != null)
                     {
                         wallsPositions.Remove(mazeCell);

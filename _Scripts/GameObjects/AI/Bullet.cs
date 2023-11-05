@@ -1,15 +1,23 @@
-﻿using ConsoleRoguelike.CreatureCondition;
+﻿using ConsoleRoguelike.AIBehaviour.Attack;
+using ConsoleRoguelike.AIBehaviour.Walking;
+using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.CreatureCondition;
 using ConsoleRoguelike.GameScene;
 
 namespace ConsoleRoguelike.GameObjects.AI
 {
-    internal class Bullet : LifelessEnemy, IDamager
+    internal class Bullet : LifelessEnemy, IDamager, IWalkingEnemy, IAttackingEnemy
     {
         public event Action<Bullet> Destroyed;
 
+        private readonly AttackBehaviour _attackBehavior;
+        public AttackBehaviour AttackBehaviour => _attackBehavior;
+
+        private readonly WalkingBehaviour _walkingBehaviour;
+        public WalkingBehaviour WalkingBehaviour => _walkingBehaviour;
+
         private float _damageValue = 0;
         private int _maxLifeTime = 0;
-        private Vector2Int _moveDirection = Vector2Int.Zero;
 
         private int _lifeTime = 0;
         private bool _isDestroyed = false;
@@ -26,47 +34,42 @@ namespace ConsoleRoguelike.GameObjects.AI
             char renderedChar = '☼',
             ConsoleColor color = ConsoleColor.Red) : base(position, renderedChar, scene, sceneLayer, color)
         {
-            _moveDirection = moveDirection;
             _damageValue = damageValue;
             _maxLifeTime = maxLifeTime;
+
+            _walkingBehaviour = new DirectionalWalkingBehaviour(this, moveDirection);
+            _attackBehavior = new AttackOnCollisionEnterBehaviour(this, this, _damageValue);
         }
 
         public override void MakeNextStep()
         {
             if (TryDestroyIfLifeTimeIsOver() == false)
             {
-                TryToAttack();
-                MoveNext();
-                TryToAttack();
+                Attack();
+                MoveNextPosition();
+                Attack();
             }
         }
 
-        public override bool TryToAttack()
+        public void Attack()
         {
             if (_isDestroyed == false)
             {
-                List<GameObject> gameObjects = SceneLayer.GetGameObjectsOnPosition(Position);
-                for (int i = 0; i < gameObjects.Count; i++)
+                if (_attackBehavior.TryAttack())
                 {
-                    if (gameObjects[i] is Player playerGameObject)
-                    {
-                        playerGameObject.Health.Damage(_damageValue, this);
-                        Destroy();
-                        return true;
-                    }
+                    Destroy();
                 }
             }
-            
-            return false;
         }
 
-        public override void MoveNext()
+        public void MoveNextPosition()
         {
             if (_isDestroyed == false)
             {
-                if (CanMoveToDirection())
+                Vector2Int nextMovePosition = _walkingBehaviour.GetNextMovePosition();
+                if (CanMove(nextMovePosition))
                 {
-                    Position += _moveDirection;
+                    MoveTo(nextMovePosition);
                     _lifeTime++;
                 }
                 else
@@ -74,11 +77,6 @@ namespace ConsoleRoguelike.GameObjects.AI
                     Destroy();
                 }
             }
-        }
-
-        public bool CanMoveToDirection()
-        {
-            return CanMove(Position + _moveDirection);
         }
 
         private bool TryDestroyIfLifeTimeIsOver()

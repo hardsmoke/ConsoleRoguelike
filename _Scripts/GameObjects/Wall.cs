@@ -1,10 +1,15 @@
-﻿namespace ConsoleRoguelike.GameObjects
-{
-    using GameScene;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.GameScene;
 
+namespace ConsoleRoguelike.GameObjects
+{
     internal class Wall : GameObject
     {
-        public Wall(Vector2Int position, char renderedChar, IReadOnlyScene scene, SceneLayer sceneLayer) : base(position, renderedChar, scene, sceneLayer)
+        public Wall(
+            Vector2Int position, 
+            IReadOnlyScene scene,
+            SceneLayer sceneLayer,
+            char renderedChar = '█') : base(position, renderedChar, scene, sceneLayer)
         {
         }
     }

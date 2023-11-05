@@ -1,7 +1,8 @@
-﻿namespace ConsoleRoguelike.GameScene
-{
-    using GameObjects;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.GameObjects;
 
+namespace ConsoleRoguelike.GameScene
+{
     internal class SceneLayer
     {
         /// <summary>

@@ -1,8 +1,8 @@
-﻿namespace ConsoleRoguelike.GameScene
-{
-    using GameObjects;
-    using System;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.GameObjects;
 
+namespace ConsoleRoguelike.GameScene
+{
     internal class Scene : IReadOnlyScene
     {
         public event Action<SceneLayer, Vector2Int, GameObject> GameObjectChangedPosition;

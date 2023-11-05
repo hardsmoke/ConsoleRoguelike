@@ -1,4 +1,5 @@
-﻿using ConsoleRoguelike.CreatureCondition;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.CreatureCondition;
 using ConsoleRoguelike.GameScene;
 
 namespace ConsoleRoguelike.GameObjects

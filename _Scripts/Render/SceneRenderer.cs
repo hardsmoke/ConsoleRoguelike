@@ -1,15 +1,16 @@
-﻿namespace ConsoleRoguelike.Render
-{
-    using GameObjects;
-    using GameScene;
+﻿using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.GameObjects;
+using ConsoleRoguelike.GameScene;
 
+namespace ConsoleRoguelike.Render
+{
     internal class SceneRenderer : IConsoleRenderer
     {
-        private readonly Scene _scene;
+        private readonly IReadOnlyScene _scene;
 
         public Vector2Int StartRenderPosition { get => Vector2Int.Zero; }
 
-        public SceneRenderer(Scene scene)
+        public SceneRenderer(IReadOnlyScene scene)
         {
             _scene = scene;
             _scene.GameObjectChangedPosition += OnGameObjectChangedPosition;

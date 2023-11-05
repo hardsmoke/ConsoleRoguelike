@@ -1,10 +1,15 @@
-﻿using ConsoleRoguelike.CreatureCondition;
+﻿using ConsoleRoguelike.AIBehaviour.Attack;
+using ConsoleRoguelike.CoreModule;
+using ConsoleRoguelike.CreatureCondition;
 using ConsoleRoguelike.GameScene;
 
 namespace ConsoleRoguelike.GameObjects.AI
 {
-    internal class Zombie : AliveEnemy, IDamager
+    internal class Zombie : AliveEnemy, IDamager, IAttackingEnemy
     {
+        private AttackBehaviour _attackBehaviour;
+        public AttackBehaviour AttackBehaviour => _attackBehaviour;
+
         private float _damageValue;
 
         public Zombie(
@@ -16,36 +21,22 @@ namespace ConsoleRoguelike.GameObjects.AI
             float damageValue = 25f) : base(position, renderedChar, scene, sceneLayer, mazeMemoryCapacity)
         {
             _damageValue = damageValue;
+            _attackBehaviour = new AttackOnCollisionEnterBehaviour(this, this, _damageValue);
         }
 
         public string DeathReason => "KILLED BY ZOMBIE";
 
         public override void MakeNextStep()
         {
-            if (TryToAttack())
+            if (_attackBehaviour.TryAttack())
             {
-                MoveNext();
+                MoveNextPosition();
             }
             else
             {
-                MoveNext();
-                TryToAttack();
+                MoveNextPosition();
+                _attackBehaviour.TryAttack();
             }          
-        }
-
-        public override bool TryToAttack()
-        {
-            List<GameObject> gameObjects = SceneLayer.GetGameObjectsOnPosition(Position);
-            for (int i = 0; i < gameObjects.Count; i++)
-            {
-                if (gameObjects[i] is Player playerGameObject)
-                {
-                    playerGameObject.Health.Damage(_damageValue, this);
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

@@ -1,20 +1,17 @@
 ﻿namespace ConsoleRoguelike.CreatureCondition
 {
-    [Serializable]
-    public class Health
+    public class Health : IReadOnlyHealth
     {
-        public event Action<float> OnHealthChange;
-        public event Action OnHeal;
-        public event Action<float> OnDamage;
-        public event Action<IDamager> OnDie;
+        public event Action<float, float> HealthChanged;
+        public event Action Healed;
+        public event Action<float> Damaged;
+        public event Action<IDamager> Died;
 
         private float _maxValue;
         public float MaxValue => _maxValue;
 
         private float _value;
         public float Value => _value;
-
-        public float NormalizedValue => _value / _maxValue;
 
         public Health(float maxValue, float value)
         {
@@ -32,22 +29,22 @@
                 {
                     if (deltaValue > 0)
                     {
-                        OnHeal?.Invoke();
+                        Healed?.Invoke();
                     }
                     else if (deltaValue < 0)
                     {
-                        OnDamage?.Invoke(deltaValue * -1);
+                        Damaged?.Invoke(deltaValue * -1);
                     }
 
                     _value = clampedValue;
 
-                    OnHealthChange?.Invoke(deltaValue);
+                    HealthChanged?.Invoke(value - deltaValue, value);
                 }
             }
             else
             {
                 _value = 0;
-                OnDie?.Invoke(affector as IDamager);
+                Died?.Invoke(affector as IDamager);
             }
         }
 
