@@ -1,5 +1,4 @@
-﻿using ConsoleRoguelike._Scripts.AIBehaviour.Attack;
-using ConsoleRoguelike.AIBehaviour.Attack;
+﻿using ConsoleRoguelike.AIBehaviour.Attack;
 using ConsoleRoguelike.CoreModule;
 using ConsoleRoguelike.GameScene;
 

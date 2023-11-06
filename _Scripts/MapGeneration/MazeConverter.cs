@@ -50,37 +50,23 @@ namespace ConsoleRoguelike.MapGeneration
             {
                 for (int y = 0; y < height; y++)
                 {
-                    Vector2Int mazeWallPosition = ConvertMazeToConsoleCoords(maze.Cells[x, y].Position);
-                    Vector2Int mazeCell = wallsPositions.Where((pos) => pos == mazeWallPosition).FirstOrDefault();
-                    Vector2Int upWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Up).FirstOrDefault();
-                    Vector2Int downWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Down).FirstOrDefault();
-                    Vector2Int leftWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Left).FirstOrDefault();
-                    Vector2Int rightWall = wallsPositions.Where((pos) => pos == mazeWallPosition + Vector2Int.Right).FirstOrDefault();
-
-                    if (mazeCell != null)
+                    var offsets = new Vector2Int[]
                     {
-                        wallsPositions.Remove(mazeCell);
+                        Vector2Int.Up,
+                        Vector2Int.Down,
+                        Vector2Int.Left,
+                        Vector2Int.Right
+                    };
+
+                    var positions = new Vector2Int[5];
+                    positions[0] = ConvertMazeToConsoleCoords(maze.Cells[x, y].Position);
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        positions[i + 1] = positions[0] + offsets[i];
                     }
 
-                    if (upWall != null)
-                    {
-                        wallsPositions.Remove(upWall);
-                    }
-
-                    if (downWall != null)
-                    {
-                        wallsPositions.Remove(downWall);
-                    }
-
-                    if (leftWall != null)
-                    {
-                        wallsPositions.Remove(leftWall);
-                    }
-
-                    if (rightWall != null)
-                    {
-                        wallsPositions.Remove(rightWall);
-                    }
+                    wallsPositions.RemoveAll(pos => positions.Contains(pos));
                 }
             }
         }

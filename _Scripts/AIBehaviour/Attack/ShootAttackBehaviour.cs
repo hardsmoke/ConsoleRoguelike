@@ -1,10 +1,9 @@
-﻿using ConsoleRoguelike.AIBehaviour.Attack;
-using ConsoleRoguelike.CoreModule;
+﻿using ConsoleRoguelike.CoreModule;
 using ConsoleRoguelike.GameObjects;
 using ConsoleRoguelike.GameObjects.AI;
 using ConsoleRoguelike.MapGeneration;
 
-namespace ConsoleRoguelike._Scripts.AIBehaviour.Attack
+namespace ConsoleRoguelike.AIBehaviour.Attack
 {
     internal class ShootAttackBehaviour : AttackBehaviour
     {
